@@ -1,9 +1,9 @@
 package com.coderxi.pulgin.paidfly.service
 
 import com.coderxi.pulgin.paidfly.PaidFlyPlugin.Companion.plugin
-import com.coderxi.pulgin.paidfly.paytype.PayRule
 import com.coderxi.pulgin.paidfly.paytype.ExpPayType
 import com.coderxi.pulgin.paidfly.paytype.MoneyPayType
+import com.coderxi.pulgin.paidfly.paytype.PayRule
 import com.coderxi.pulgin.paidfly.paytype.PayType
 import com.coderxi.pulgin.paidfly.utils.BaseService
 import org.bukkit.entity.Player
@@ -21,18 +21,19 @@ object PayService : BaseService() {
 
     private val cache = ConcurrentHashMap<UUID, PayRule>()
 
-    private val payTypes : Map<String, PayType>  = listOf(ExpPayType, MoneyPayType).associateBy { it.name }
+    private val payTypes: Map<String, PayType> =
+        listOf(ExpPayType, MoneyPayType).associateBy { it.name }
 
     override fun init() {
         reload()
         payTypes.values.forEach { it.init() }
-        plugin.server.pluginManager.registerEvents(Listener(),plugin)
+        plugin.server.pluginManager.registerEvents(Listener(), plugin)
     }
 
     override fun reload() {
         payRuleMain = PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Main")!!)
         payRuleGroups = plugin.config.getConfigurationSection("Group")?.getKeys(false)?.associateWith { group ->
-            PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Group.$group")!!)
+            PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Group.§group")!!)
         } ?: emptyMap()
         cache.clear()
     }
@@ -40,19 +41,19 @@ object PayService : BaseService() {
     fun getPayRuleByPlayer(player: Player): PayRule {
         return cache.computeIfAbsent(player.uniqueId) {
             payRuleGroups.entries.firstOrNull { (group, _) ->
-                player.hasPermission("paidfly.group.$group")
+                player.hasPermission("paidfly.group.§group")
             }?.value ?: payRuleMain
         }
     }
 
     fun getPayTypeByName(name: String): PayType? {
-        return if (payTypes.containsKey(name)) payTypes[name] else null
+        return payTypes[name]
     }
 
     fun testEnough(player: Player): Boolean {
         val rule = getPayRuleByPlayer(player)
-        val payType = getPayTypeByName(rule.payType)
-        return payType!!.getValue(player) >= rule.payCost
+        val payType = getPayTypeByName(rule.payType) ?: return false
+        return payType.getValue(player) >= rule.payCost
     }
 
     private class Listener : org.bukkit.event.Listener {
@@ -61,5 +62,4 @@ object PayService : BaseService() {
             cache.remove(event.player.uniqueId)
         }
     }
-
 }

@@ -1,19 +1,19 @@
 package com.coderxi.pulgin.paidfly
 
-import com.coderxi.pulgin.paidfly.utils.Localizer
 import com.coderxi.pulgin.paidfly.command.PaidFlyCmdExecutor
 import com.coderxi.pulgin.paidfly.command.PaidFlyTabCompleter
 import com.coderxi.pulgin.paidfly.expansion.PaidFlyPAPIExpansion
 import com.coderxi.pulgin.paidfly.service.*
+import com.coderxi.pulgin.paidfly.utils.Localizer
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
-import java.nio.file.Path
 
 class PaidFlyPlugin : JavaPlugin() {
 
     companion object {
         val plugin: PaidFlyPlugin get() = getPlugin(PaidFlyPlugin::class.java)
     }
+
     lateinit var localizer: Localizer
     private val services = listOf(PaidFlyService, PayService)
 
@@ -28,9 +28,13 @@ class PaidFlyPlugin : JavaPlugin() {
         services.forEach { it.init() }
         getCommand("paidfly")?.setExecutor(PaidFlyCmdExecutor)
         getCommand("paidfly")?.tabCompleter = PaidFlyTabCompleter()
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null){
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             PaidFlyPAPIExpansion().register()
         }
+    }
+
+    override fun onDisable() {
+        PaidFlyService.shutdown()
     }
 
     fun reload() {
@@ -38,5 +42,4 @@ class PaidFlyPlugin : JavaPlugin() {
         localizer.reload()
         services.forEach { it.reload() }
     }
-
 }

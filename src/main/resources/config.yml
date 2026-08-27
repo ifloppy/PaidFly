@@ -1,3 +1,4 @@
+# Payment is accumulated during flight and withdrawn when flight ends or the server shuts down.
 Language: zh-CN.yml
 Main:
   PayType: Money
