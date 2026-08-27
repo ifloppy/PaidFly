@@ -1,46 +1,67 @@
-[**English**](https://github.com/coderxi1/PaidFly/blob/main/README.md)
+[**English**](https://github.com/coderxi1/PaidFly/blob/master/README.md)
 
 # PaidFly
 
-**PaidFly** 是一个 Minecraft（Paper）服务器插件，允许玩家消耗游戏币或经验值进行飞行！
+**PaidFly** 是一款为 Minecraft 服务器设计的插件，让玩家可以通过消耗（游戏币/经验值）进行飞行！
 
 ![banner](https://github.com/user-attachments/assets/a36e817f-58ae-4890-9f6c-373ac6a22fca)
 
 ## 功能
 
-- 支持使用游戏币/经验值进行付费飞行
-- 支持聊天、标题栏、ActionBar 和声音提示
-- 支持倒计时提醒
+- 支持玩家使用游戏币/经验值进行付费飞行
+- 支持Title、Action、音效提示
+- 支持倒计时提示
 - 飞行期间累积费用，在飞行结束时统一结算
 - 每个计费周期只查询余额，不执行扣款
 
 ## 安装
 
-1. 从[插件发布页](https://github.com/coderxi1/PaidFly/releases)下载最新版本**`PaidFly.jar`**（如果服务器已有`kotlin-stdlib`，则可以使用`PaidFly-kotlin.jar`）
-2. 将插件放入服务器的`plugins/`文件夹
-3. 为默认用户组设置`paidfly.fly`权限以允许玩家使用
-4. 如果使用经验值飞行，请确保服务器安装了`Vault`经济插件。
+1. 在[插件发布页](https://github.com/coderxi1/PaidFly/releases)下载最新版本的 **`PaidFly.jar`** (若服务器具有`kotlin-stdlib`可使用`PaidFly-kotlin.jar`)
+2. 将插件放入服务器 `plugins/` 文件夹  
+3. 若要允许玩家使用，给默认用户组设置`paidfly.fly`权限
+4. 如果使用经验飞行，请确保服务器已安装 **`Vault`** 经济插件。
 
 ## 配置
 
 ```yaml
 Main:
-  PayType: Money        # 支付类型
-  PayInterval: 3s       # 支付间隔
-  PayCost: 0.5          # 每个计费周期的费用
-  AutoOffThreshold: 0.5 # 余额低于此值时关闭飞行
+  PayType: Money        #扣费模式
+  PayInterval: 3s       #扣费间隔
+  PayCost: 0.5          #每次扣多少
+  AutoOffThreshold: 0.5 #小于此值关闭飞行 推荐设置为和PayCost一致
 ```
 
 玩家飞行期间，PaidFly 会在内存中累积费用。每个计费周期只检查当前余额是否能够覆盖“已累积费用 + 自动关闭阈值”，不会调用经济插件扣款；玩家关闭飞行、退出服务器、重载插件或服务器关闭时，累积费用只结算一次。未完成的计费周期不会收费。
 
-## 命令
+## 指令
 
-所有命令以`/paidfly`开头，别名为`/fly`：
+所有指令均以 `/paidfly` 开头，可使用别名 `/fly`：
 
-| 命令 | 权限 | 说明 |
-|---------|-------------|-------------|
-| `/fly` | `paidfly.fly` | 等同于`/fly toggle` |
+| 指令 | 权限 | 描述 |
+|------|------|------|
+| `/fly` | `paidfly.fly` | 等于`/fly toggle`命令 |
 | `/fly on/off/toggle` | `paidfly.fly` | 切换飞行状态 |
-| `/fly on/off/toggle [player]` | `paidfly.others` | 为指定玩家切换飞行状态，需要`paidfly.others`权限 |
-| `/fly help` | `paidfly.use` | 显示插件帮助（根据权限显示不同内容） |
-| `/fly reload` | `paidfly.reload` | 重载插件配置 |
+| `/fly on/off/toggle [player]` | `paidfly.others` | 切换其他玩家飞行状态，需要 `paidfly.others` 权限 |
+| `/fly help` | `paidfly.use` | 显示插件帮助信息（根据权限显示不同内容） |
+| `/fly reload` | `paidfly.reload` | 重载插件配置文件 |
+
+## 权限
+
+| 权限节点 | 作用 |
+|-----------|------|
+| `paidfly.use` | 基础使用权限，查看帮助信息 |
+| `paidfly.fly` | 启用、关闭或切换飞行 |
+| `paidfly.others` | 对其他玩家操作飞行 |
+| `paidfly.reload` | 重载插件配置 |
+| `paidfly.admin` | 访问管理员子命令（如 `/paidfly reload`） |
+
+## PlaceholderAPI
+
+| 占位符 | 描述 | 示例 |
+|------|------|------|
+| `%paidfly_status%` | 玩家当前是否处于付费飞行状态 | `true` / `false` |
+| `%paidfly_remaining_seconds%` | 玩家剩余飞行时间（秒） | `120` |
+| `%paidfly_pay_type%` | 当前使用的支付类型名称（本地化名称） | `金币` |
+| `%paidfly_pay_type_value%` | 当前支付类型对玩家计算出的原始数值 | `12.3333333334` |
+| `%paidfly_pay_type_value_fixed%` | 当前支付数值，默认保留 **1 位小数** | `12.3` |
+| `%paidfly_pay_type_value_fixed_<digits>%` | 当前支付数值，保留指定小数位数 | `%paidfly_pay_type_value_fixed_2%` → `12.34`
