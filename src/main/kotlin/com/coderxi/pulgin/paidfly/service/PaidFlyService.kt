@@ -18,6 +18,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.server.PluginDisableEvent
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
+import java.math.BigDecimal
 import java.util.Collections
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -34,11 +35,15 @@ object PaidFlyService : BaseService() {
         val rule: PayRule,
         val payType: PayType
     ) {
+        private var billedIntervals: Long = 0
         var pendingAmount: Double = 0.0
             private set
 
         fun accrue() {
-            pendingAmount += rule.payCost
+            billedIntervals++
+            pendingAmount = BigDecimal.valueOf(rule.payCost)
+                .multiply(BigDecimal.valueOf(billedIntervals))
+                .toDouble()
         }
 
         fun hasEnough(balance: Double): Boolean {
