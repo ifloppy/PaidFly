@@ -1,0 +1,40 @@
+name: Package
+
+on:
+  push:
+    branches:
+      - "perf/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      APP_VERSION: perf-5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Build plugin
+        run: |
+          chmod +x gradlew
+          ./gradlew build
+
+      - name: Publish downloadable JAR
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: perf-build-${{ github.sha }}
+          target_commitish: ${{ github.sha }}
+          name: PaidFly perf build (${{ github.sha }})
+          prerelease: true
+          files: build/libs/PaidFly-${{ env.APP_VERSION }}.jar
