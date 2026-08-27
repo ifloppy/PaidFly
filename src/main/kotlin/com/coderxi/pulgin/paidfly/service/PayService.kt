@@ -33,7 +33,7 @@ object PayService : BaseService() {
     override fun reload() {
         payRuleMain = PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Main")!!)
         payRuleGroups = plugin.config.getConfigurationSection("Group")?.getKeys(false)?.associateWith { group ->
-            PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Group.§group")!!)
+            PayRule.fromConfigurationSection(plugin.config.getConfigurationSection("Group.$group")!!)
         } ?: emptyMap()
         cache.clear()
     }
@@ -41,7 +41,7 @@ object PayService : BaseService() {
     fun getPayRuleByPlayer(player: Player): PayRule {
         return cache.computeIfAbsent(player.uniqueId) {
             payRuleGroups.entries.firstOrNull { (group, _) ->
-                player.hasPermission("paidfly.group.§group")
+                player.hasPermission("paidfly.group.$group")
             }?.value ?: payRuleMain
         }
     }
