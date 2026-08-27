@@ -1,6 +1,9 @@
 name: Verify
 
 on:
+  push:
+    branches:
+      - "perf/**"
   pull_request:
     branches:
       - main
